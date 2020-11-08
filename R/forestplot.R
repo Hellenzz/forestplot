@@ -193,6 +193,8 @@ forestplot.default <- function (labeltext,
                                 lineheight         = "auto",
                                 line.margin,
                                 col                = fpColors(),
+                                col.use.group      = FALSE,
+                                group_colors       = list(box=c(), line=c()),
                                 txt_gp             = fpTxtGp(),
                                 xlog               = FALSE,
                                 xticks,
@@ -283,9 +285,12 @@ forestplot.default <- function (labeltext,
          " Lower bound columns:", ncol(lower),
          " Upper bound columns:", ncol(upper))
 
-  if (NCOL(mean) != length(col$box)){
+  if (NCOL(mean) != length(col$box) && !col.use.group){
     col$box <- rep(col$box, length.out = NCOL(mean))
     col$line <- rep(col$lines, length.out = NCOL(mean))
+  } else if (col.use.group) {
+    col$box <- group_colors$box
+    col$line <- group_colors$line
   }
 
   # Prepare the legend marker
@@ -772,8 +777,13 @@ forestplot.default <- function (labeltext,
     }
 
     # The line and box colors may vary
-    clr.line <- rep(col$line, length.out=length(low_values))
-    clr.marker <- rep(col$box, length.out=length(low_values))
+    if (col.use.group) {
+      clr.line <- group_colors$line[i]
+      clr.marker <- group_colors$box[i]
+    } else {
+      clr.line <- rep(col$line, length.out=length(low_values))
+      clr.marker <- rep(col$box, length.out=length(low_values))
+    }
     clr.summary <- rep(col$summary, length.out=length(low_values))
 
     line_vp <- viewport(layout.pos.row = i,
